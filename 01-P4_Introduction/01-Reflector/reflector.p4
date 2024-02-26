@@ -21,6 +21,8 @@ struct headers {
     ethernet_t   ethernet;
 }
 
+// standard metadata a v1model.p4-ből jön
+
 /*************************************************************************
 *********************** P A R S E R  ***********************************
 *************************************************************************/
@@ -31,9 +33,12 @@ parser MyParser(packet_in packet,
                 inout standard_metadata_t standard_metadata) {
 
       state start{
+          transition parse_ethernet;
+      }
 
-          /* TODO 1: parse ethernet header */
-          transition accept;
+      state parse_ethernet {
+        packet.extract(hdr.ethernet);
+        transition accept;
       }
 
 }
@@ -55,9 +60,16 @@ control MyIngress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t standard_metadata) {
 
+    
+    action swapMac() {
+        macAddr_t tmp = hdr.ethernet.srcAddr;
+        hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
+        hdr.ethernet.dstAddr = tmp;
+    }
+
     apply {
-       /* TODO 2: swap mac addresses */
-       /* TODO 3: set output port    */
+       swapMac();
+       standard_metadata.egress_spec = standard_metadata.ingress_port; // ingress port a bejövő port, egress_spec??
     }
 }
 
@@ -85,7 +97,8 @@ control MyComputeChecksum(inout headers  hdr, inout metadata meta) {
 
 control MyDeparser(packet_out packet, in headers hdr) {
     apply {
-        /* TODO 4: deparse ethernet header */
+        // kiemmittálja a struct "sorrendjében" az elemeket
+        packet.emit(hdr);
 	}
 }
 
@@ -101,3 +114,6 @@ V1Switch(
 	MyComputeChecksum(),
 	MyDeparser()
 ) main;
+
+
+//mininet host majd parancsok, paraméterek

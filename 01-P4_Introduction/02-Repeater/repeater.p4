@@ -44,6 +44,26 @@ control MyIngress(inout headers hdr,
                   inout standard_metadata_t standard_metadata) {
 
     /* TODO 1: For solution 2 -> define a table that matches standard_metadata.ingress_port */
+    action setEgress(bit<9> port) {
+        standard_metadata.egress_spec = port;
+    }
+
+    table forward{
+        actions = {
+            NoAction;
+            setEgress;
+        }
+        key = {
+            standard_metadata.ingress_port:   exact;
+        }
+        size = 100;
+        default_action = NoAction;
+    }
+
+    // table_add forward setEgress 1 => 2
+    // table_add forward setEgress 2 => 1
+    //p4switch_reboot s1
+
     /* TODO 2: For solution 2 -> define an action that modifies the egress_spec */
 
     apply {
@@ -51,6 +71,7 @@ control MyIngress(inout headers hdr,
         /* TODO 3:*/
         /* Solution 1: Without tables, write the algorithm directly here*/
         /* Solution 2: Apply the table you use */
+        forward.apply();
 
     }
 }

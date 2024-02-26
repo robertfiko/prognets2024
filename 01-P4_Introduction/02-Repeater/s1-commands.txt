@@ -1,1 +1,4 @@
 # TODO: populate table with forwarding rules
+
+table_add forward setEgress 2 => 1
+table_add forward setEgress 1 => 2

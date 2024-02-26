@@ -61,7 +61,7 @@ def send_packet(iface, addr):
     input("Press the return key to send a packet:")
     print("Sending on interface %s to %s\n" % (iface, str(addr)))
     pkt =  Ether(src=get_if_hwaddr(iface), dst='00:01:02:03:04:05')
-    pkt = pkt /IP(dst=addr)
+    pkt = pkt /IP(dst=addr) # / operátorral lehet hozzá konkatenálni
     sendp(pkt, iface=iface, verbose=False)
 
 def main():
